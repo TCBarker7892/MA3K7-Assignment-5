@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Producing the prime distribution figure
+
+numberOfSpirals = 80
+matrixDim = 2*numberOfSpirals + 1
+
+spiralMatrix = np.zeros((matrixDim, matrixDim))
+matrixValues = np.arange(matrixDim**2) + 1
+
+def primeCheck(number):
+    if number == 1:
+        return False
+    else:
+        i = 2
+        while i <= np.sqrt(number):
+            if number % i == 0:
+                return False
+            i +=1
+        return True
+
+primeDictionary = {}
+
+for num in matrixValues:
+    if primeCheck(num):
+        primeDictionary[num] = True
+    
+prevPosition = (matrixDim-1, matrixDim)
+writeDirection = (0, -1)
+for num in matrixValues:
+    writePosition = (prevPosition[0] + writeDirection[0], prevPosition[1] + writeDirection[1])
+    #print(str(num) + "  " + str(writePosition))
+    spiralMatrix[writePosition[0]][writePosition[1]] = matrixDim**2 - num + 1
+    nextPos = (writePosition[0] + writeDirection[0], writePosition[1] + writeDirection[1])
+    nextPosInBounds = (0 <= nextPos[0] < matrixDim) and (0 <= nextPos[1] < matrixDim)
+    validNextPos = nextPosInBounds and (spiralMatrix[nextPos[0]][nextPos[1]] == 0)
+    prevPosition = writePosition
+    if not validNextPos:
+        if writeDirection == (0, -1):
+            writeDirection = (-1, 0)
+        elif writeDirection == (-1, 0):
+            writeDirection = (0, 1)
+        elif writeDirection == (0, 1):
+            writeDirection = (1, 0)
+        else:
+            writeDirection = (0, -1)
+
+for i in range(matrixDim):
+    for j in range(matrixDim):
+        if spiralMatrix[i][j] in primeDictionary:
+            plt.scatter(j - numberOfSpirals, numberOfSpirals - i, color='black', s=3)
+            
+plt.xlabel('X - Distance from center point')
+plt.ylabel('Y - Distance from center point')
+plt.show()
+
+# Investigating the distribution of Mersenne primes
+
+mersennePrimes = {}
+mersennePrimes[3] = mersennePrimes[7] = mersennePrimes[31] = mersennePrimes[127] = mersennePrimes[8191] = 1
+
+for i in range(matrixDim):
+    for j in range(matrixDim):
+        if spiralMatrix[i][j] in mersennePrimes:
+            plt.scatter(j - numberOfSpirals, numberOfSpirals - i, color='blue', s=3)
+            print(f'Mersenne Prime: {int(spiralMatrix[i][j])} is located at ({numberOfSpirals - i},{j - numberOfSpirals})')
+            
+plt.xlabel('X - Distance from center point')
+plt.ylabel('Y - Distance from center point')
+plt.show()
